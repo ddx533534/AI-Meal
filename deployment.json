@@ -1,0 +1,7 @@
+{
+  "workerName": "ai-meal-adk-verification",
+  "url": "https://ai-meal-adk-verification.ai-meal-backend.workers.dev",
+  "versionId": "3737dfe8-32a6-407b-981a-5fb1540d3f25",
+  "databaseName": "ai-meal-records",
+  "databaseId": "d7936695-f059-4734-960b-b7fb02e79b03"
+}

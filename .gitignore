@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.env
+.env.*
+!.env.example
+verification/*.local.json
+
+.netlify/
+
+# Local workflow state and generated planning/verification artifacts.
+.workflow_guard/
+aircrafts/

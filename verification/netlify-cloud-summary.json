@@ -1,0 +1,67 @@
+{
+  "verifiedAt": "2026-10-08T09:18:42.986Z",
+  "url": "https://ai-meal-adk-verification-dream533534.netlify.app",
+  "runtime": "Netlify Functions cloud",
+  "checks": [
+    {
+      "path": "/health",
+      "method": "GET",
+      "httpStatus": 200,
+      "wallDurationMs": 2309,
+      "cfRay": null
+    },
+    {
+      "path": "/api/analyze",
+      "method": "POST",
+      "httpStatus": 401,
+      "wallDurationMs": 401,
+      "cfRay": null,
+      "error": "UNAUTHORIZED"
+    },
+    {
+      "path": "/api/records",
+      "method": "GET",
+      "httpStatus": 401,
+      "wallDurationMs": 397,
+      "cfRay": null,
+      "error": "UNAUTHORIZED"
+    },
+    {
+      "path": "/api/analyze",
+      "method": "POST",
+      "httpStatus": 400,
+      "wallDurationMs": 386,
+      "cfRay": null,
+      "error": "INVALID_INPUT"
+    },
+    {
+      "path": "/api/records?limit=0",
+      "method": "GET",
+      "httpStatus": 400,
+      "wallDurationMs": 383,
+      "cfRay": null,
+      "error": "INVALID_PAGINATION"
+    },
+    {
+      "path": "/api/analyze",
+      "method": "POST",
+      "httpStatus": 201,
+      "wallDurationMs": 5064,
+      "cfRay": null
+    },
+    {
+      "path": "/api/records",
+      "method": "GET",
+      "httpStatus": 200,
+      "wallDurationMs": 488,
+      "cfRay": null
+    }
+  ],
+  "model": "gemini-3.1-flash-lite",
+  "status": "passed",
+  "realGeminiInvocation": "passed",
+  "remoteBlobsRoundTrip": "passed",
+  "recordId": "a06bd5d9-f99c-4f0b-9b85-4977b993f871",
+  "modelDurationMs": 4596,
+  "deployId": "6ac75cd7f0cb2c3e109c844b"
+}

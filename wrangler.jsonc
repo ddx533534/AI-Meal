@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ai-meal-adk-verification",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-08",
+  "vars": {
+    "GEMINI_MODEL": "gemini-3.1-flash-lite"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ai-meal-records",
+      "database_id": "d7936695-f059-4734-960b-b7fb02e79b03",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

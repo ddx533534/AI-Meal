@@ -1,0 +1,17 @@
+{
+  "provider": "netlify",
+  "siteId": "2e2e8d1b-8a95-4cb6-9147-0676c1d68a3c",
+  "name": "ai-meal-adk-verification-dream533534",
+  "url": "https://ai-meal-adk-verification-dream533534.netlify.app",
+  "accountSlug": "dream533534",
+  "storage": "Netlify Blobs",
+  "storeName": "ai-meal-records",
+  "deployId": "6ac75cd7f0cb2c3e109c844b",
+  "deployState": "ready",
+  "publishedAt": "2026-10-08T09:05:38.614Z",
+  "productionVisibility": "public",
+  "deployPreviewVisibility": "private",
+  "secretConfiguration": "deploy-only Functions variables",
+  "cloudVerifiedAt": "2026-10-08T09:18:42.986Z",
+  "cloudVerification": "passed"
+}
