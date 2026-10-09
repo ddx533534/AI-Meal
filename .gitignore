@@ -14,3 +14,9 @@ verification/*.local.json
 # Local workflow state and generated planning/verification artifacts.
 .workflow_guard/
 aircrafts/
+android/.gradle/
+android/.kotlin/
+android/**/build/
+android/local.properties
+*.apk
+*.jks

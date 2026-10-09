@@ -16,16 +16,21 @@ export async function curlOutbound(request) {
   }
   if (request.method === 'POST') lines.push(`data = ${quote(await request.text())}`);
   return new Promise((resolve, reject) => {
+    if (request.signal.aborted) return reject(request.signal.reason);
     const child = spawn('curl', [
       '--config', '-', '--silent', '--show-error', '--max-time', '35',
       '--request', request.method, '--write-out', '\n%{http_code}', request.url,
     ]);
     child.stdin.end(lines.join('\n') + '\n');
+    const abort = () => { child.kill(); reject(request.signal.reason ?? new DOMException('Request aborted', 'AbortError')); };
+    request.signal.addEventListener('abort', abort, { once: true });
     let output = '';
     child.stdout.on('data', (data) => { output += data; });
     child.stderr.resume();
-    child.on('error', () => reject(new Error('System transport failed to start')));
+    child.on('error', () => { request.signal.removeEventListener('abort', abort); reject(new Error('System transport failed to start')); });
     child.on('close', (code) => {
+      request.signal.removeEventListener('abort', abort);
+      if (request.signal.aborted) return;
       if (code !== 0) return reject(new Error('System transport failed'));
       const index = output.lastIndexOf('\n');
       const status = Number(output.slice(index + 1));

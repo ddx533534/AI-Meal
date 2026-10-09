@@ -22,12 +22,22 @@
     "verify:live:worker": "node scripts/live-smoke.mjs",
     "preverify:live:worker": "npm run build:worker",
     "verify:cloud:worker": "node scripts/cloud-smoke.mjs",
-    "build:test-runtime": "node scripts/build-netlify-test.mjs"
+    "build:test-runtime": "node scripts/build-netlify-test.mjs",
+    "predev:meal": "npm run build:test-runtime",
+    "dev:meal": "node scripts/meal-picker-dev.mjs",
+    "preverify:meal:live": "npm run build:test-runtime",
+    "verify:meal:live": "node scripts/meal-picker-live.mjs",
+    "preverify:meal:cloud": "npm run build:test-runtime",
+    "verify:meal:cloud": "node scripts/meal-picker-live.mjs --cloud"
   },
   "dependencies": {
     "@google/adk": "2.2.1",
+    "@google/genai": "2.28.0",
+    "@modelcontextprotocol/sdk": "1.27.1",
     "@netlify/blobs": "11.1.3",
-    "@netlify/functions": "6.0.2"
+    "@netlify/functions": "6.0.2",
+    "ajv": "8.17.1",
+    "zod": "4.6.5"
   },
   "overrides": {
     "@opentelemetry/sdk-trace-base": "2.11.0",

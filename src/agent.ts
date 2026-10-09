@@ -17,7 +17,7 @@ export class ModelInvocationError extends Error {
   }
 }
 
-function failureReason(error: unknown): string {
+export function failureReason(error: unknown): string {
   if (error instanceof ModelInvocationError) return error.reason;
   if (typeof error !== 'object' || error === null) return 'UNKNOWN';
   if ('status' in error && typeof error.status === 'number' && error.status >= 400 && error.status <= 599) {

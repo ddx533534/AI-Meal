@@ -1,4 +1,53 @@
-# AI-Meal 后端验证项目
+# AI-Meal Android 选餐应用
+
+Android 工程位于 `android/`，使用 Kotlin、Compose 和官方 AndroidX A2UI v0.9.1 渲染器。界面采用白色极简风，提供食物录入与删除、文字选餐、条件点选、换一批、确认选择和无匹配预算调整。运行代码不包含预置演示菜单；名称、价格与口味均来自用户录入，尚未连接真实商家。
+
+应用最低 Android 8（API 26），构建需要 JDK 17 以上、Android SDK 37.1、AGP 9.1.1 和 Gradle 9.3.1。官方 A2UI 及其 Material catalog 当前为 `1.0.0-alpha01`，依赖版本固定；尚不代表稳定版 API。
+
+```sh
+cd android
+./gradlew assembleDebug
+```
+
+在 `android/local.properties` 中配置自己的 `sdk.dir`，或设置 `ANDROID_HOME`。APK 生成在 `android/app/build/outputs/apk/debug/app-debug.apk`。首次打开填写访问令牌，服务地址默认指向下面的 Netlify 站点。令牌使用 Android Keystore AES-GCM 加密保存，配置弹窗禁止截图，应用包中没有服务密钥。
+
+先点击首页“录入 / 管理”，填写食物名称、价格（0–10000 元，最多两位小数）、适用餐别、辣度、主食和清淡口味。保存后可返回首页选餐。菜单为空时显示录入引导，不调用模型生成候选。食物库保存在 Netlify Blobs `ai-meal-foods`，使用现有后端令牌共享访问；当前没有多用户隔离。重复提交同一录入 ID 不会重复创建。删除需在应用中确认，已删除食物不会从旧会话恢复。
+
+文字例子：`帮我选个午饭，预算30元，不要辣。` 也可以直接点选餐别、预算和辣度后点击“更新推荐”。主食和清淡口味在“更多偏好”中。未说明餐别时只显示午饭/晚饭问题并保留其他条件；无匹配时解释原因并提供真实匹配数支持的预算或单项放宽方案。确认后只展示最终选择。完整条件表单在“改一下条件”中。模型只解析文字并调用工具，候选和价格以实际 MCP 菜单查询为准。
+
+选餐接口采用 Netlify Blobs `ai-meal-picker-sessions` 独立 store，持久化领域条件、结果、修订号和脱敏 MCP 证据。更新依赖真实 ETag 条件写入，过期或并发修订返回 409；Android 同时只提交一个请求并加载冲突后的最新状态。
+
+| 请求 | 用途 |
+| --- | --- |
+| `GET /api/meal-picker/foods` | 读取已录入食物 |
+| `POST /api/meal-picker/foods` | 校验并保存食物（可提供 UUID 保证重试幂等） |
+| `DELETE /api/meal-picker/foods?id=<uuid>` | 删除指定食物 |
+| `GET /api/meal-picker/bootstrap` | 初始官方 A2UI 面板，不调用模型 |
+| `POST /api/meal-picker/session` | 以 `text` 或 `filters` 创建会话 |
+| `GET /api/meal-picker/session?id=<uuid>` | 恢复会话 |
+| `POST /api/meal-picker/action` | `sessionId`、`revision` 和 A2UI 动作（update/rotate/select/adjust_budget/choose_meal/relax_filter/edit_filters/restart） |
+| `DELETE /api/meal-picker/session?id=<uuid>` | 清理指定会话 |
+
+这些接口均使用现有 Bearer 令牌，返回 `session` 元数据和按顺序排列的完整 `messages` 数组。单个 JSON 响应不等同于 JSONL 流。MCP 使用官方 SDK 的 client/server 和 in-memory transport，实际经过发现和调用协议；它目前部署在同一个 Function 进程内。
+
+文字选餐请求强制模型调用提供的工具，每轮最多一次模型调用，工具完成后直接展示 MCP 结果，不再等待模型总结。明确的按钮动作直接调用 MCP，不依赖模型或模型密钥；会话执行路径标记为 `direct`。单次模型尝试限制为 10 秒，暂时性上游错误或超时最多再试一次，避免超过线上观察到的 30 秒 Function 时限。失败日志只记录原因码与调用数量；Android 将超时、模型繁忙等错误分别提示，非 JSON 网关错误也按 HTTP 状态处理。模型与网络故障仍可能发生，重试不会自动放宽筛选条件。
+
+本地选餐开发与真实链路验证：
+
+```sh
+npm run dev:meal -- --curl-outbound
+npm run verify:meal:live
+npm run verify:meal:cloud
+node scripts/verify-guided-cloud.mjs
+```
+
+`verify-guided-cloud.mjs` 使用当前已保存食物验证逐步选餐，只创建并删除独立验收会话，不改变食物记录。旧的 `verify:meal:cloud` 真实链路验收要求食物库为空，临时创建明确标注的验收食物，结束时删除食物和会话并确认库中剩余 0 条。自动化测试样本仅位于 `tests/fixtures`，不打包到 Function 或 APK。生产演示数据清理使用 `scripts/clean-demo-data.mjs`（默认只读；`--apply` 删除能由演示来源、候选 ID 或已保存验收报告明确识别的数据）。
+
+选餐开发服务监听 `127.0.0.1:8889`，模拟器 debug 包可使用 `http://10.0.2.2:8889`。本地数据保存在 `.netlify/meal-blobs/`；生产代码不使用本地测试适配器。Blobs 11.1.3 的本地服务器缺少 GET ETag，并发条件写入也需要串行化，因此本地脚本使用扩展适配器。生产的原子写入另用真实 Netlify 接口验证。`--curl-outbound` 仅用于本机 Node 直连异常时转发真实 Gemini HTTP，不模拟模型。
+
+`scripts/android-test-setup.mjs` 配合独立测试 APK 写入加密测试配置，令牌经 `run-as` 标准输入传递。配置器不包含在应用 APK 中，默认只接受明确指定的 emulator ID。用户明确要求真实手机安装后才可使用 `--physical-authorized`；配置完成移除手机上的测试 APK，并删除临时明文文件。
+
+原有饮食分析与历史后端仍保留如下。
 
 当前采用 Google ADK JS / TypeScript + Gemini + Netlify Functions + Netlify Blobs。用户于 2026-10-08 确认切换到 Netlify Free；账号套餐已在控制台核实。生产代码与密钥已部署，生产版本公开、预览版本私有，线上健康、鉴权、真实 Gemini 调用和远端 Blobs 完整读回均已通过。结果见 [Netlify 验证报告](verification/NETLIFY.md)。
 
@@ -55,7 +104,7 @@ npm run verify:live
 ```
 
 - `build` 调用官方 Netlify 构建器，完成类型检查及 Functions 打包。
-- `test` 包含 8 项 Worker / D1 回归和 6 项 Netlify / Blobs 验证，运行真实 ADK 和存储运行时，只模拟 Gemini HTTP。
+- `test` 包含 8 项 Worker / D1 回归、6 项 Netlify / Blobs 验证和 10 项选餐验证，运行真实 ADK、MCP 和存储运行时，只模拟 Gemini HTTP。
 - `verify:live` 使用真实 Gemini API 和临时官方 BlobsServer，断言生成内容完整读回；结束后清理临时数据。原始报告为 `verification/netlify-live-smoke.local.json`。
 
 TypeScript 固定 5.9.3，以兼容 Netlify 构建器所用解析器。OpenTelemetry trace base/node 保持 2.11.0 覆盖；这源于旧安装过程中 2.12.0 依赖链无法取得，当前组合已验证。

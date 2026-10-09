@@ -6,12 +6,8 @@
   "accountSlug": "dream533534",
   "storage": "Netlify Blobs",
   "storeName": "ai-meal-records",
-  "deployId": "6ac75cd7f0cb2c3e109c844b",
-  "deployState": "ready",
-  "publishedAt": "2026-10-08T09:05:38.614Z",
-  "productionVisibility": "public",
-  "deployPreviewVisibility": "private",
+  "deployId": "6ac8914acffbaaf1c677237e",
   "secretConfiguration": "deploy-only Functions variables",
-  "cloudVerifiedAt": "2026-10-08T09:18:42.986Z",
-  "cloudVerification": "passed"
+  "deployedAt": "2026-10-09T07:01:47.101Z",
+  "foodStoreName": "ai-meal-foods"
 }
